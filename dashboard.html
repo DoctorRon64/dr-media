@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .message img {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .message-text {
+            background-color: #f1f1f1;
+            padding: 5px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+
+        .message-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome, <span id="username"></span></h1>
+    <div id="profile">
+        <img id="avatar" src="" alt="Profile Avatar" width="100">
+        <p id="description"></p>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+
+    <h2>Available Group Chats</h2>
+    <ul id="groupList"></ul>
+
+    <h3>Create a New Group</h3>
+    <form id="newGroupForm">
+        <input type="text" id="groupName" placeholder="Group Name" required>
+        <button type="submit">Create Group</button>
+    </form>
+
+    <h2>Messages</h2>
+    <div id="messagesContainer" class="message-container"></div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+        document.getElementById('username').textContent = username;
+
+        // Fetch and display user profile
+        async function fetchProfile() {
+            const response = await fetch(`/profile/${username}`);
+            const profile = await response.json();
+            document.getElementById('avatar').src = profile.avatarUrl || 'default-avatar.png';
+            document.getElementById('description').textContent = profile.description || 'No description set.';
+        }
+
+        // Fetch and display available groups
+        async function fetchGroups() {
+            const response = await fetch('/groups');
+            const groups = await response.json();
+            const groupList = document.getElementById('groupList');
+            groupList.innerHTML = '';
+            groups.forEach(group => {
+                const li = document.createElement('li');
+                li.textContent = group;
+                li.onclick = () => openGroupChat(group); // Ensure it opens the correct group
+                groupList.appendChild(li);
+            });
+        }
+
+        // Create a new group
+        async function createGroup(event) {
+            event.preventDefault();
+            const groupName = document.getElementById('groupName').value;
+            const response = await fetch('/groups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ groupName })
+            });
+            const result = await response.json();
+            alert(result.message);
+            fetchGroups();
+        }
+
+        // Open a group chat and display its messages
+        async function openGroupChat(groupName) {
+            const response = await fetch(`/messages/${groupName}`);
+            const messages = await response.json();
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = '';
+
+            messages.forEach(msg => {
+                const msgElement = document.createElement('div');
+                msgElement.classList.add('message');
+                msgElement.innerHTML = `
+                    <img src="${msg.avatarUrl || 'default-avatar.png'}" alt="Avatar">
+                    <div class="message-text">
+                        <strong>${msg.username}</strong>: ${msg.content}
+                    </div>
+                `;
+                messagesContainer.appendChild(msgElement);
+            });
+
+            // Allow sending a message in the group
+            const sendMessageForm = document.createElement('form');
+            sendMessageForm.innerHTML = `
+                <textarea id="messageInput" placeholder="Write a message..." required></textarea>
+                <button type="submit">Send</button>
+            `;
+            sendMessageForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = document.getElementById('messageInput').value;
+                const response = await fetch('/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        token,
+                        group: groupName,
+                        content: message
+                    })
+                });
+                const result = await response.json();
+                alert(result.message);
+                openGroupChat(groupName); // Refresh chat messages
+            });
+
+            messagesContainer.appendChild(sendMessageForm);
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('newGroupForm').addEventListener('submit', createGroup);
+
+        fetchProfile();
+        fetchGroups();
+    </script>
+</body>
+
+</html>

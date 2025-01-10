@@ -1,0 +1,12 @@
+{
+    "JohnDoe2": {
+        "password": "$2b$10$sK/PKeNxIJsob8zwfYXYgugOMS8GhRRh6S8NtsCU9UPxogcAf0GRy",
+        "description": "I like big womand",
+        "avatarUrl": "/uploads/avatar-1736521884911-270083245.png"
+    },
+    "McQueen": {
+        "password": "$2b$10$7ZO6YC69uFfreKI1/lqOG.e8l04J7kUOVg1B3fhJvMi.rYZiDl552",
+        "description": "I love cars boutta groom all over them whenever I see them I wanna buszzz",
+        "avatarUrl": "/uploads/avatar-1736522134805-2469765.png"
+    }
+}
