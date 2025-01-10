@@ -1,5 +1,56 @@
 {
-  "Autos enzo": [],
-  "Ao": [],
-  "talk about fruits": []
+  "sigmaDen": [
+    {
+      "username": "hey",
+      "content": "f92bf09b1376fafd2595d248ae16fa96:3ef4b8d512701aa995c43bac77acd22e",
+      "timestamp": "2025-01-10T23:32:10.787Z",
+      "avatarUrl": "/uploads/avatar-1736551917381-859675943.jpg"
+    },
+    {
+      "username": "retro",
+      "content": "f6a6603f1471f4249e1049781ce58ab7:fd1642b049c16557541b231e4421d46c",
+      "timestamp": "2025-01-10T23:32:59.546Z",
+      "avatarUrl": "/default-avatar.png"
+    },
+    {
+      "username": "victor",
+      "content": "5f3a843146b231795bb07904bf7f4c60:4ced113ac1df457e7f970ca8cfcf7033",
+      "timestamp": "2025-01-10T23:40:03.542Z",
+      "avatarUrl": "/uploads/avatar-1736552313138-825267531.png"
+    }
+  ],
+  "itworks": [
+    {
+      "username": "hey",
+      "content": "fef5e44c3269af8ad823e44a1afa5eb9:02044ac71c416ef63d391d9a267a766c",
+      "timestamp": "2025-01-10T23:32:22.504Z",
+      "avatarUrl": "/uploads/avatar-1736551917381-859675943.jpg"
+    },
+    {
+      "username": "retro",
+      "content": "c2a1363188a2b765edfb9ce97b08861b:808edbacbbd89abbf13dec296705c5ccfad7542262473823939f8324cd4cdf84",
+      "timestamp": "2025-01-10T23:33:09.355Z",
+      "avatarUrl": "/default-avatar.png"
+    },
+    {
+      "username": "victor",
+      "content": "1aae859248bc281359ac501f046959c3:3f25351a6418f47114ff598b3c50d209",
+      "timestamp": "2025-01-10T23:40:33.853Z",
+      "avatarUrl": "/uploads/avatar-1736552313138-825267531.png"
+    },
+    {
+      "username": "Obama",
+      "content": "5360cbf210e502841fc8402a95b68f47:5cf9bd3ede5cdc806d990fe77d6348c3",
+      "timestamp": "2025-01-10T23:46:38.750Z",
+      "avatarUrl": "/uploads/avatar-1736552767862-55256725.jpg"
+    }
+  ],
+  "fruit": [
+    {
+      "username": "Obama",
+      "content": "fe7a2ae6c8e450cb815027580f5f4b4c:74efbacfdb09c259c08536b383bb0120",
+      "timestamp": "2025-01-10T23:47:07.908Z",
+      "avatarUrl": "/uploads/avatar-1736552767862-55256725.jpg"
+    }
+  ]
 }

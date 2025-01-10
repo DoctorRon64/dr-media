@@ -1,12 +1,22 @@
 {
-    "JohnDoe2": {
-        "password": "$2b$10$sK/PKeNxIJsob8zwfYXYgugOMS8GhRRh6S8NtsCU9UPxogcAf0GRy",
-        "description": "I like big womand",
-        "avatarUrl": "/uploads/avatar-1736521884911-270083245.png"
-    },
-    "McQueen": {
-        "password": "$2b$10$7ZO6YC69uFfreKI1/lqOG.e8l04J7kUOVg1B3fhJvMi.rYZiDl552",
-        "description": "I love cars boutta groom all over them whenever I see them I wanna buszzz",
-        "avatarUrl": "/uploads/avatar-1736522134805-2469765.png"
-    }
+  "hey": {
+    "password": "$2b$10$.G6aHx0ey2Xz9vVtQtcT5eLyydqWI9PJaw7Lr.S98NDIs.lEPqe4q",
+    "description": "1",
+    "avatarUrl": "/uploads/avatar-1736551917381-859675943.jpg"
+  },
+  "retro": {
+    "password": "$2b$10$1LuVT41Z6.ohAfGH.dLQg.p1ZvcewQUT.Ll6QHCag/KBlTOmOVgOO",
+    "description": "",
+    "avatarUrl": null
+  },
+  "victor": {
+    "password": "$2b$10$c6mcAjzAjGN/Q6AETBk.uu0qjzgNrtXttyCBc4rzdIctA03Qx.e1C",
+    "description": "hey",
+    "avatarUrl": "/uploads/avatar-1736552313138-825267531.png"
+  },
+  "Obama": {
+    "password": "$2b$10$./pWpuHX.ebgk7W3SV6IyeF2VRK0H.YANeLUwTMR0aRYOvEIs877a",
+    "description": "1",
+    "avatarUrl": "/uploads/avatar-1736552767862-55256725.jpg"
+  }
 }

@@ -37,10 +37,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const initFiles = () => {
+    const files = [
+        { path: USERS_FILE, defaultContent: '{}' },
+        { path: GROUPS_FILE, defaultContent: '{}' },
+        { path: MESSAGES_FILE, defaultContent: '{}' },
+    ];
+
+    files.forEach(({ path, defaultContent }) => {
+        if (!fs.existsSync(path)) {
+            fs.writeFileSync(path, defaultContent, 'utf-8');
+        }
+    });
+};
+
+// Call this function before starting the server
+initFiles();
+
 // Helper functions to read and write files
 function loadFile(file) {
     if (!fs.existsSync(file)) return {};
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
+    const content = fs.readFileSync(file, 'utf-8').trim();
+    return content ? JSON.parse(content) : {};
 }
 
 function saveFile(file, data) {
@@ -49,24 +67,23 @@ function saveFile(file, data) {
 
 // Encrypt and decrypt functions
 function encrypt(text) {
-    const iv = crypto.randomBytes(IV_LENGTH);
+    const iv = crypto.randomBytes(IV_LENGTH);  // Generate a random IV
     const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+    return iv.toString('hex') + ':' + encrypted;  // Return IV and encrypted text together
 }
 
 function decrypt(text) {
-    const textParts = text.split(':');
-    const iv = Buffer.from(textParts[0], 'hex');
-    const encryptedText = textParts[1];
+    const textParts = text.split(':');  // Split the IV and the encrypted text
+    const iv = Buffer.from(textParts[0], 'hex');  // Get the IV from the beginning
+    const encryptedText = textParts[1];  // The rest is the encrypted message
+
     const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
 }
-
-// Routes
 
 // Register (with description and avatar)
 app.post('/register', upload.single('avatar'), async (req, res) => {
@@ -103,27 +120,28 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Fetch groups (show available group chats)
-// Fetch all groups (show available group chats)
-app.get('/groups', (req, res) => {
-    const groups = loadFile(GROUPS_FILE);
-    res.json(Object.keys(groups)); // Send list of group names
-});
-
-
 // Create a new group chat
 app.post('/groups', (req, res) => {
     const { groupName } = req.body;
-    const groups = loadFile(GROUPS_FILE);
+    const groups = loadFile(GROUPS_FILE);  // This loads the existing groups from the JSON file
 
+    // Check if group already exists
     if (groups[groupName]) {
         return res.json({ message: 'Group already exists!' });
     }
 
-    groups[groupName] = [];
-    saveFile(GROUPS_FILE, groups);
+    // Create a new group if it doesn't exist
+    groups[groupName] = [];  // Initialize the group with an empty array for messages
+    saveFile(GROUPS_FILE, groups);  // Save the new group to the JSON file
 
     res.json({ message: 'Group created successfully!' });
+});
+
+// Create a new group chat
+// Get all groups
+app.get('/groups', (req, res) => {
+    const groups = loadFile(GROUPS_FILE);
+    res.json(Object.keys(groups)); // Return an array of group names
 });
 
 // Send message to a group
@@ -142,26 +160,102 @@ app.get('/profile/:username', (req, res) => {
 
 
 // Get messages for a group
-// Get messages for a group
-// Get messages for a group
 app.get('/messages/:group', (req, res) => {
     const { group } = req.params;
     const groups = loadFile(GROUPS_FILE);
 
     if (!groups[group]) {
-        return res.status(404).json({ message: 'Group not found!' });
+        return res.status(404).json({ message: 'Group not found' });
     }
 
-    // Decrypt messages before sending, add avatarUrl
     const decryptedMessages = groups[group].map(msg => ({
         username: msg.username,
         content: decrypt(msg.content),
         timestamp: msg.timestamp,
-        avatarUrl: users[msg.username]?.avatarUrl || 'default-avatar.png', // Ensure avatar URL is sent
+        avatarUrl: msg.avatarUrl, // Ensure avatar URL is included
     }));
 
     res.json(decryptedMessages);
 });
+
+// Send message to a group
+app.post('/message', (req, res) => {
+    const { username, token, group, content } = req.body;
+    const users = loadFile(USERS_FILE);
+    const groups = loadFile(GROUPS_FILE);
+
+    // Validate user
+    if (!users[username]) {
+        return res.status(403).json({ message: 'Unauthorized: User does not exist.' });
+    }
+
+    // Validate group
+    if (!groups[group]) {
+        return res.status(404).json({ message: 'Group not found.' });
+    }
+
+    // Encrypt the message
+    const encryptedMessage = encrypt(content);
+
+    // Get user's avatar URL
+    const avatarUrl = users[username].avatarUrl || '/default-avatar.png'; // Use a default avatar if none exists
+
+    // Save the message to the group with avatar
+    groups[group].push({
+        username,
+        content: encryptedMessage,
+        timestamp: new Date().toISOString(),
+        avatarUrl: avatarUrl, // Include avatar URL in message
+    });
+
+    saveFile(GROUPS_FILE, groups); // Save updated groups to file
+    res.json({ message: 'Message sent successfully.' });
+});
+
+// Edit profile (username and description)
+app.post('/edit-profile', async (req, res) => {
+    const { username, newUsername, newDescription, token } = req.body;
+    const users = loadFile(USERS_FILE);
+
+    // Check if the user exists and validate the token (session management)
+    if (!users[username] || users[username].token !== token) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    // If the new username exists, return an error
+    if (newUsername && users[newUsername]) {
+        return res.status(400).json({ message: 'Username already taken!' });
+    }
+
+    // Update the user's profile data
+    if (newUsername) {
+        const userData = users[username];
+        delete users[username]; // Remove old username from users object
+        users[newUsername] = { ...userData, description: newDescription || userData.description };
+    } else {
+        users[username].description = newDescription || users[username].description;
+    }
+
+    saveFile(USERS_FILE, users);
+    res.json({ message: 'Profile updated successfully!' });
+});
+
+// Delete account
+app.post('/delete-account', async (req, res) => {
+    const { username, token } = req.body;
+    const users = loadFile(USERS_FILE);
+
+    // Check if the user exists and validate the token (session management)
+    if (!users[username] || users[username].token !== token) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    // Delete the user's account
+    delete users[username];
+    saveFile(USERS_FILE, users);
+    res.json({ message: 'Account deleted successfully!' });
+});
+
 
 // Start server
 app.listen(PORT, () => {
