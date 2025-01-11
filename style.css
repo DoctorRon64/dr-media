@@ -125,6 +125,16 @@ h1, h2, h3 {
     border-radius: 5px;
     max-width: 80%;
     word-wrap: break-word;
+    margin-left: 10px;
+}
+
+.message-username {
+    background: #ffa600;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 80%;
+    word-wrap: break-word;
+    margin-left: 10px;
 }
 
 .timestamp {

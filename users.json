@@ -1,22 +1,14 @@
 {
-  "hey": {
-    "password": "$2b$10$.G6aHx0ey2Xz9vVtQtcT5eLyydqWI9PJaw7Lr.S98NDIs.lEPqe4q",
+  "DrRon": {
+    "password": "$2b$10$ep78nW4skEmEQmFNokpIMeUxQmNAvu7K1NSidV4GJFiOEZT1SJjtC",
+    "description": "joj jojojojo",
+    "avatarUrl": "/uploads/avatar-1736616490683-208464622.png",
+    "token": "e25ad449-8c08-4129-96ba-d761017e3932"
+  },
+  "philip": {
+    "password": "$2b$10$r68xPWMVKsNVEx9rs6Z8cOeAowD00voC7DsxKQVnpxnysuwZN/aKC",
     "description": "1",
-    "avatarUrl": "/uploads/avatar-1736551917381-859675943.jpg"
-  },
-  "retro": {
-    "password": "$2b$10$1LuVT41Z6.ohAfGH.dLQg.p1ZvcewQUT.Ll6QHCag/KBlTOmOVgOO",
-    "description": "",
-    "avatarUrl": null
-  },
-  "victor": {
-    "password": "$2b$10$c6mcAjzAjGN/Q6AETBk.uu0qjzgNrtXttyCBc4rzdIctA03Qx.e1C",
-    "description": "hey",
-    "avatarUrl": "/uploads/avatar-1736552313138-825267531.png"
-  },
-  "Obama": {
-    "password": "$2b$10$./pWpuHX.ebgk7W3SV6IyeF2VRK0H.YANeLUwTMR0aRYOvEIs877a",
-    "description": "1",
-    "avatarUrl": "/uploads/avatar-1736552767862-55256725.jpg"
+    "avatarUrl": "/uploads/avatar-1736616830845-720556360.jpg",
+    "token": "17cf595d-37cb-4ffb-a2af-8619572e72d3"
   }
 }

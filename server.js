@@ -12,13 +12,13 @@ const PORT = 3000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); // Serve static files from the current directory
 app.use(express.static(path.join(__dirname, 'uploads'))); // Serve images from the uploads folder
 
 // File paths
 const USERS_FILE = './users.json';
-const MESSAGES_FILE = './messages.json';
 const GROUPS_FILE = './groups.json';
+const MESSAGES_FILE = './messages.json';
 
 // Encryption settings
 const ENCRYPTION_KEY = crypto.randomBytes(32); // Static key for simplicity
@@ -34,9 +34,8 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-
 const upload = multer({ storage: storage });
-
+// Initialize files if they don't exist
 const initFiles = () => {
     const files = [
         { path: USERS_FILE, defaultContent: '{}' },
@@ -50,21 +49,17 @@ const initFiles = () => {
         }
     });
 };
-
 // Call this function before starting the server
 initFiles();
-
 // Helper functions to read and write files
 function loadFile(file) {
     if (!fs.existsSync(file)) return {};
     const content = fs.readFileSync(file, 'utf-8').trim();
     return content ? JSON.parse(content) : {};
 }
-
 function saveFile(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
-
 // Encrypt and decrypt functions
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);  // Generate a random IV
@@ -73,7 +68,6 @@ function encrypt(text) {
     encrypted += cipher.final('hex');
     return iv.toString('hex') + ':' + encrypted;  // Return IV and encrypted text together
 }
-
 function decrypt(text) {
     const textParts = text.split(':');  // Split the IV and the encrypted text
     const iv = Buffer.from(textParts[0], 'hex');  // Get the IV from the beginning
@@ -84,8 +78,7 @@ function decrypt(text) {
     decrypted += decipher.final('utf8');
     return decrypted;
 }
-
-// Register (with description and avatar)
+// Register new user with avatar
 app.post('/register', upload.single('avatar'), async (req, res) => {
     const { username, password, description } = req.body;
     const users = loadFile(USERS_FILE);
@@ -95,14 +88,14 @@ app.post('/register', upload.single('avatar'), async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const avatarUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const avatarUrl = req.file ? `/uploads/${req.file.filename}` : '/default-avatar.png'; // Default avatar if no file uploaded
     users[username] = { password: hashedPassword, description, avatarUrl };
     saveFile(USERS_FILE, users);
 
     res.json({ message: 'Registration successful!' });
 });
 
-// Login
+// Login user and return token
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const users = loadFile(USERS_FILE);
@@ -113,7 +106,9 @@ app.post('/login', async (req, res) => {
 
     const isValid = await bcrypt.compare(password, users[username].password);
     if (isValid) {
-        const token = uuidv4(); // Simple session token
+        const token = uuidv4(); // Generate session token
+        users[username].token = token;  // Save token to user
+        saveFile(USERS_FILE, users);  // Save the updated user data with the token
         res.json({ message: 'Login successful!', token, username });
     } else {
         res.json({ message: 'Invalid password!' });
@@ -123,28 +118,66 @@ app.post('/login', async (req, res) => {
 // Create a new group chat
 app.post('/groups', (req, res) => {
     const { groupName } = req.body;
-    const groups = loadFile(GROUPS_FILE);  // This loads the existing groups from the JSON file
+    const groups = loadFile(GROUPS_FILE);  // Load existing groups from the JSON file
 
-    // Check if group already exists
     if (groups[groupName]) {
         return res.json({ message: 'Group already exists!' });
     }
 
-    // Create a new group if it doesn't exist
     groups[groupName] = [];  // Initialize the group with an empty array for messages
-    saveFile(GROUPS_FILE, groups);  // Save the new group to the JSON file
+    saveFile(GROUPS_FILE, groups);
 
     res.json({ message: 'Group created successfully!' });
 });
 
-// Create a new group chat
+app.get('/dashboard.html', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    const users = loadFile(USERS_FILE);
+
+    // Check for a valid token
+    const user = Object.values(users).find((user) => user.token === token);
+    if (user) {
+        res.sendFile(path.join(__dirname, 'dashboard.html'));
+    } else {
+        res.redirect('/login.html');
+    }
+});
+
+// Delete a group
+app.delete('/groups/:groupName', (req, res) => {
+    const { groupName } = req.params;
+    const groups = loadFile(GROUPS_FILE); // Load the list of groups from your data file
+
+    if (!groups[groupName]) {
+        return res.status(404).json({ message: 'Group not found' });
+    }
+
+    delete groups[groupName]; // Remove the group from the data
+
+    saveFile(GROUPS_FILE, groups); // Save the updated list back to the file
+
+    res.json({ message: `Group "${groupName}" deleted successfully` });
+});
+
 // Get all groups
 app.get('/groups', (req, res) => {
     const groups = loadFile(GROUPS_FILE);
     res.json(Object.keys(groups)); // Return an array of group names
 });
 
-// Send message to a group
+app.post('/validate-token', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]; // Extract the token
+    const users = loadFile(USERS_FILE);
+
+    // Find user with matching token
+    const user = Object.values(users).find((user) => user.token === token);
+
+    if (user) {
+        return res.json({ valid: true });
+    }
+    res.json({ valid: false });
+});
+
 // Get user profile
 app.get('/profile/:username', (req, res) => {
     const { username } = req.params;
@@ -158,90 +191,51 @@ app.get('/profile/:username', (req, res) => {
     res.json({ username, description: user.description, avatarUrl: user.avatarUrl });
 });
 
-
-// Get messages for a group
-app.get('/messages/:group', (req, res) => {
-    const { group } = req.params;
+app.get('/messages/:groupName', (req, res) => {
+    const { groupName } = req.params;
     const groups = loadFile(GROUPS_FILE);
+    const messages = loadMessagesFile(MESSAGES_FILE);
 
+    if (!groups[groupName]) {
+        return res.status(404).json({ message: 'Group not found' });
+    }
+
+    // Filter messages for the given group
+    const groupMessages = messages.filter(msg => msg.group === groupName);
+
+    res.json(groupMessages);
+});
+
+app.post('/message', (req, res) => {
+    const { username, token, group, content } = req.body;
+    
+    // Validate group exists
+    const groups = loadFile(GROUPS_FILE);
     if (!groups[group]) {
         return res.status(404).json({ message: 'Group not found' });
     }
 
-    const decryptedMessages = groups[group].map(msg => ({
-        username: msg.username,
-        content: decrypt(msg.content),
-        timestamp: msg.timestamp,
-        avatarUrl: msg.avatarUrl, // Ensure avatar URL is included
-    }));
+    // Store the message (without checking users for now)
+    const messages = loadMessagesFile(MESSAGES_FILE);
+    messages.push({ group, username, content, timestamp: new Date().toISOString() });
 
-    res.json(decryptedMessages);
+    saveMessagesFile(MESSAGES_FILE, messages); // Save new message to the database or file
+    res.json({ message: 'Message sent successfully' });
 });
 
-// Send message to a group
-app.post('/message', (req, res) => {
-    const { username, token, group, content } = req.body;
-    const users = loadFile(USERS_FILE);
-    const groups = loadFile(GROUPS_FILE);
+// Helper functions for messages file
+function loadMessagesFile(file) {
+    if (!fs.existsSync(file)) return [];
+    const content = fs.readFileSync(file, 'utf-8').trim();
+    return content ? JSON.parse(content) : [];
+}
 
-    // Validate user
-    if (!users[username]) {
-        return res.status(403).json({ message: 'Unauthorized: User does not exist.' });
-    }
-
-    // Validate group
-    if (!groups[group]) {
-        return res.status(404).json({ message: 'Group not found.' });
-    }
-
-    // Encrypt the message
-    const encryptedMessage = encrypt(content);
-
-    // Get user's avatar URL
-    const avatarUrl = users[username].avatarUrl || '/default-avatar.png'; // Use a default avatar if none exists
-
-    // Save the message to the group with avatar
-    groups[group].push({
-        username,
-        content: encryptedMessage,
-        timestamp: new Date().toISOString(),
-        avatarUrl: avatarUrl, // Include avatar URL in message
-    });
-
-    saveFile(GROUPS_FILE, groups); // Save updated groups to file
-    res.json({ message: 'Message sent successfully.' });
-});
-
-// Edit profile (username and description)
-app.post('/edit-profile', async (req, res) => {
-    const { username, newUsername, newDescription, token } = req.body;
-    const users = loadFile(USERS_FILE);
-
-    // Check if the user exists and validate the token (session management)
-    if (!users[username] || users[username].token !== token) {
-        return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    // If the new username exists, return an error
-    if (newUsername && users[newUsername]) {
-        return res.status(400).json({ message: 'Username already taken!' });
-    }
-
-    // Update the user's profile data
-    if (newUsername) {
-        const userData = users[username];
-        delete users[username]; // Remove old username from users object
-        users[newUsername] = { ...userData, description: newDescription || userData.description };
-    } else {
-        users[username].description = newDescription || users[username].description;
-    }
-
-    saveFile(USERS_FILE, users);
-    res.json({ message: 'Profile updated successfully!' });
-});
+function saveMessagesFile(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
 
 // Delete account
-app.post('/delete-account', async (req, res) => {
+app.post('/delete-account', (req, res) => {
     const { username, token } = req.body;
     const users = loadFile(USERS_FILE);
 
@@ -256,8 +250,7 @@ app.post('/delete-account', async (req, res) => {
     res.json({ message: 'Account deleted successfully!' });
 });
 
-
-// Start server
+// Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    //console.log(`Server running on http://localhost:${PORT}`);
 });
