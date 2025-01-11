@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Register</h1>
+    <form id="registerForm" enctype="multipart/form-data">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+
+        <label for="description">Description:</label>
+        <textarea id="description"></textarea>
+
+        <label for="avatar">Avatar (Optional):</label>
+        <input type="file" id="avatar" accept="image/*">
+
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const description = document.getElementById('description').value;
+            const avatar = document.getElementById('avatar').files[0];
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('description', description);
+            if (avatar) formData.append('avatar', avatar);
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            alert(result.message);
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>
