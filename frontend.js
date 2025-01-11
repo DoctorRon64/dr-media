@@ -122,7 +122,8 @@ async function deleteGroup(groupName) {
 
 document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const messageContent = document.getElementById('messageContent').value;
+    const messageContentInput = document.getElementById('messageContent'); // Get input element
+    const messageContent = messageContentInput.value; // Get input value
 
     if (!currentGroup) {
         alert('Please select a group first!');
@@ -143,6 +144,7 @@ document.getElementById('sendMessageForm').addEventListener('submit', async (e) 
     const result = await response.json();
     if (response.ok) {
         fetchMessages(currentGroup);  // Reload the messages
+        messageContentInput.value = ' ';
     } else {
         alert(result.message || 'Failed to send message');
     }

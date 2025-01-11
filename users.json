@@ -1,14 +1,14 @@
 {
-  "DrRon": {
-    "password": "$2b$10$ep78nW4skEmEQmFNokpIMeUxQmNAvu7K1NSidV4GJFiOEZT1SJjtC",
-    "description": "joj jojojojo",
-    "avatarUrl": "/uploads/avatar-1736616490683-208464622.png",
-    "token": "e25ad449-8c08-4129-96ba-d761017e3932"
+  "Boi": {
+    "password": "$2b$10$6LH/Jy5DUfkS/EjM0hKP7OIY.fHR2NK/IT6PTrH6H990NAYKnuj5K",
+    "description": "ga je mongodb gebruiken",
+    "avatarUrl": "/uploads/avatar-1736631929450-794675496.png",
+    "token": "b9ef7ea8-5f81-4f9b-af31-d658a2b2fb3b"
   },
-  "philip": {
-    "password": "$2b$10$r68xPWMVKsNVEx9rs6Z8cOeAowD00voC7DsxKQVnpxnysuwZN/aKC",
+  "jolo": {
+    "password": "$2b$10$KLL8qbP11XSkg8ZAoHau9Otdtwpu2i6dVqWnYN23P5m52YdC/vU7a",
     "description": "1",
-    "avatarUrl": "/uploads/avatar-1736616830845-720556360.jpg",
-    "token": "17cf595d-37cb-4ffb-a2af-8619572e72d3"
+    "avatarUrl": "/default-avatar.png",
+    "token": "f0d0b019-0774-4c9b-8288-d5ca4aacf3c4"
   }
 }
