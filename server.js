@@ -13,7 +13,11 @@ const PORT = 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, 'uploads'))); // Serve images from the uploads folder
+app.use(express.static(path.join(__dirname, 'public'))); // Serve images from the uploads folder
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public'));
+})
 
 // File paths
 const USERS_FILE = './users.json';
@@ -23,6 +27,11 @@ const GROUPS_FILE = './groups.json';
 // Encryption settings
 const ENCRYPTION_KEY = crypto.randomBytes(32); // Static key for simplicity
 const IV_LENGTH = 16;
+const validTokens = {}; // Store valid tokens for active users
+
+function isTokenValid(token) {
+    return Object.values(validTokens).includes(token);
+}
 
 // Multer storage for avatar uploads
 const storage = multer.diskStorage({
@@ -113,7 +122,8 @@ app.post('/login', async (req, res) => {
 
     const isValid = await bcrypt.compare(password, users[username].password);
     if (isValid) {
-        const token = uuidv4(); // Simple session token
+        const token = uuidv4();
+        validTokens[username] = token; // Store the token
         res.json({ message: 'Login successful!', token, username });
     } else {
         res.json({ message: 'Invalid password!' });
@@ -158,8 +168,6 @@ app.get('/profile/:username', (req, res) => {
     res.json({ username, description: user.description, avatarUrl: user.avatarUrl });
 });
 
-
-// Get messages for a group
 app.get('/messages/:group', (req, res) => {
     const { group } = req.params;
     const groups = loadFile(GROUPS_FILE);
@@ -172,7 +180,7 @@ app.get('/messages/:group', (req, res) => {
         username: msg.username,
         content: decrypt(msg.content),
         timestamp: msg.timestamp,
-        avatarUrl: msg.avatarUrl, // Ensure avatar URL is included
+        avatarUrl: msg.avatarUrl,
     }));
 
     res.json(decryptedMessages);
@@ -198,64 +206,36 @@ app.post('/message', (req, res) => {
     const encryptedMessage = encrypt(content);
 
     // Get user's avatar URL
-    const avatarUrl = users[username].avatarUrl || '/default-avatar.png'; // Use a default avatar if none exists
+    const avatarUrl = users[username].avatarUrl || '/default-avatar.png';
 
-    // Save the message to the group with avatar
+    // Save the message to the group
     groups[group].push({
         username,
         content: encryptedMessage,
         timestamp: new Date().toISOString(),
-        avatarUrl: avatarUrl, // Include avatar URL in message
+        avatarUrl,
     });
 
-    saveFile(GROUPS_FILE, groups); // Save updated groups to file
+    saveFile(GROUPS_FILE, groups);
     res.json({ message: 'Message sent successfully.' });
 });
 
-// Edit profile (username and description)
-app.post('/edit-profile', async (req, res) => {
-    const { username, newUsername, newDescription, token } = req.body;
-    const users = loadFile(USERS_FILE);
-
-    // Check if the user exists and validate the token (session management)
-    if (!users[username] || users[username].token !== token) {
-        return res.status(403).json({ message: 'Unauthorized' });
+app.post('/delete-account', (req, res) => {
+    const { username, token } = req.body;
+    if (!isTokenValid(token)) {
+        return res.status(401).json({ message: 'Unauthorized' });
     }
-
-    // If the new username exists, return an error
-    if (newUsername && users[newUsername]) {
-        return res.status(400).json({ message: 'Username already taken!' });
-    }
-
-    // Update the user's profile data
-    if (newUsername) {
-        const userData = users[username];
-        delete users[username]; // Remove old username from users object
-        users[newUsername] = { ...userData, description: newDescription || userData.description };
-    } else {
-        users[username].description = newDescription || users[username].description;
-    }
-
-    saveFile(USERS_FILE, users);
-    res.json({ message: 'Profile updated successfully!' });
+    deleteUserAccount(username); // Replace with your deletion logic
+    res.json({ message: 'Account deleted successfully' });
 });
 
-// Delete account
-app.post('/delete-account', async (req, res) => {
-    const { username, token } = req.body;
+function deleteUserAccount(username) {
     const users = loadFile(USERS_FILE);
-
-    // Check if the user exists and validate the token (session management)
-    if (!users[username] || users[username].token !== token) {
-        return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    // Delete the user's account
     delete users[username];
     saveFile(USERS_FILE, users);
-    res.json({ message: 'Account deleted successfully!' });
-});
 
+    delete validTokens[username]; // Remove token from active sessions
+}
 
 // Start server
 app.listen(PORT, () => {

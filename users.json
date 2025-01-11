@@ -1,22 +1,7 @@
 {
-  "hey": {
-    "password": "$2b$10$.G6aHx0ey2Xz9vVtQtcT5eLyydqWI9PJaw7Lr.S98NDIs.lEPqe4q",
-    "description": "1",
-    "avatarUrl": "/uploads/avatar-1736551917381-859675943.jpg"
-  },
-  "retro": {
-    "password": "$2b$10$1LuVT41Z6.ohAfGH.dLQg.p1ZvcewQUT.Ll6QHCag/KBlTOmOVgOO",
-    "description": "",
-    "avatarUrl": null
-  },
-  "victor": {
-    "password": "$2b$10$c6mcAjzAjGN/Q6AETBk.uu0qjzgNrtXttyCBc4rzdIctA03Qx.e1C",
-    "description": "hey",
-    "avatarUrl": "/uploads/avatar-1736552313138-825267531.png"
-  },
-  "Obama": {
-    "password": "$2b$10$./pWpuHX.ebgk7W3SV6IyeF2VRK0H.YANeLUwTMR0aRYOvEIs877a",
-    "description": "1",
-    "avatarUrl": "/uploads/avatar-1736552767862-55256725.jpg"
+  "3": {
+    "password": "$2b$10$VsGjoRWAoHJ7m9eNNYefmu723A175rvFJFLkIouFU52dXtqI1oBse",
+    "description": "3",
+    "avatarUrl": "/uploads/avatar-1736600358346-985659680.jpg"
   }
 }
