@@ -1,4 +1,10 @@
 {
+  "1": {
+    "password": "$2b$10$Pv/sToH0Dh9e8rFytdK50OAOfYE8tTLi7lyMhLHYAaDX3IgawG2AW",
+    "description": "",
+    "profileColor": "#9E8CF5",
+    "avatarUrl": "/default-avatar.png"
+  },
   "Boi": {
     "password": "$2b$10$6LH/Jy5DUfkS/EjM0hKP7OIY.fHR2NK/IT6PTrH6H990NAYKnuj5K",
     "description": "ga je mongodb gebruiken",
@@ -10,5 +16,29 @@
     "description": "1",
     "avatarUrl": "/default-avatar.png",
     "token": "f0d0b019-0774-4c9b-8288-d5ca4aacf3c4"
+  },
+  "philip": {
+    "password": "$2b$10$queMJSWgVGTegbgxFqjTp.y46fO88LIDSp.kZIC07iVXp9m.vlpue",
+    "description": "heyo",
+    "avatarUrl": "/uploads/avatar-1736791072831-766014452.jpg",
+    "token": "f35f3f2d-71bc-4719-aa83-c0ad092b6836"
+  },
+  "Beker": {
+    "password": "$2b$10$UROiuhV9kIvJ2r0xkOJwo.r3qileRjiG/8S3KRFoFS1nhS4huwGBy",
+    "description": "Beker van biton",
+    "avatarUrl": "/uploads/avatar-1736792553336-427168946.png",
+    "token": "13bfdb40-b28f-4ddd-98e4-30965e0a68ad"
+  },
+  "henk": {
+    "password": "$2b$10$b/F7Jv/1966JBCGpyuaSbubnkre8xSzcka1mSUD4frP4J4zVr7QJO",
+    "description": "1",
+    "avatarUrl": "/default-avatar.png",
+    "token": "1b6588a0-209b-4b2c-b1cf-a2176e254212"
+  },
+  "jan": {
+    "password": "$2b$10$oSO.jCuilUO28kFyxOsAgOzAKCT0fWba0wZ4kRAnbMob30MsvaWgq",
+    "description": "",
+    "avatarUrl": "/default-avatar.png",
+    "token": "90329b88-9f53-45bc-9080-1354d7ee902c"
   }
 }

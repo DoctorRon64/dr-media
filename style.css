@@ -5,7 +5,9 @@ body {
     background-color: #f7f7f7;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     color: #333;
     margin-bottom: 10px;
 }
@@ -19,7 +21,9 @@ h1, h2, h3 {
     gap: 20px;
 }
 
-.profile, .groups, .chat {
+.profile,
+.groups,
+.chat {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -108,7 +112,7 @@ h1, h2, h3 {
 
 .message {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 10px;
 }
 
@@ -129,7 +133,6 @@ h1, h2, h3 {
 }
 
 .message-username {
-    background: #ffa600;
     padding: 10px;
     border-radius: 5px;
     max-width: 80%;

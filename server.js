@@ -88,12 +88,22 @@ app.post('/register', upload.single('avatar'), async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profileColor = generateRandomColor();
     const avatarUrl = req.file ? `/uploads/${req.file.filename}` : '/default-avatar.png'; // Default avatar if no file uploaded
-    users[username] = { password: hashedPassword, description, avatarUrl };
+    users[username] = { password: hashedPassword, description, profileColor, avatarUrl };
     saveFile(USERS_FILE, users);
 
     res.json({ message: 'Registration successful!' });
 });
+
+function generateRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 // Login user and return token
 app.post('/login', async (req, res) => {
@@ -208,7 +218,7 @@ app.get('/messages/:groupName', (req, res) => {
 
 app.post('/message', (req, res) => {
     const { username, token, group, content } = req.body;
-    
+
     // Validate group exists
     const groups = loadFile(GROUPS_FILE);
     if (!groups[group]) {

@@ -28,7 +28,7 @@ async function fetchGroups() {
         const deleteButton = document.createElement('button');
         const icon = document.createElement('img');
         icon.src = 'icons/folder-delete.svg';
-        icon.alt = 'Delete Icon'; 
+        icon.alt = 'Delete Icon';
         icon.style.width = '20px';
         icon.style.height = '20px';
         deleteButton.style.marginLeft = '10px';
@@ -71,28 +71,46 @@ async function getAvatar(username) {
 
 // Fetch messages for the selected group
 async function fetchMessages(groupName) {
-    const response = await fetch(`/messages/${groupName}`);
-    if (!response.ok) {
-        alert("Can't load messages, try again");
-        return;
-    }
-    const messages = await response.json();
-    const messagesContainer = document.getElementById('messagesContainer');
-    messagesContainer.innerHTML = ''; // Clear the message container before appending new messages
-    for (const msg of messages) {
-        const avatarUrl = await getAvatar(msg.username);  // Wait for the avatar URL to be fetched
-        const msgElement = document.createElement('div');
-        msgElement.classList.add('message');
-        console.log(msg);
-        msgElement.innerHTML = `
-            <img src="${avatarUrl}" alt="Avatar" class="avatar">
-            <div class="message-username"> ${msg.username} </div>
-            <div class="message-content">${msg.content}</div>
-            <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-        `;
-        messagesContainer.appendChild(msgElement);
+    try {
+        const response = await fetch(`/messages/${groupName}`);
+        if (!response.ok) {
+            alert("Can't load messages, try again");
+            return;
+        }
+
+        const messages = await response.json();
+        const messagesContainer = document.getElementById('messagesContainer');
+        messagesContainer.innerHTML = ''; // Clear the message container before appending new messages
+
+        // Append each message to the container
+        for (const msg of messages) {
+            const avatarUrl = await getAvatar(msg.username); // Get avatar URL
+            const msgElement = document.createElement('div');
+            msgElement.classList.add('message');
+            msgElement.innerHTML = `
+                <img src="${avatarUrl}" alt="User Avatar" class="avatar" onerror="this.onerror=null;this.src='/default-avatar.png';">
+                <div class="message-username" style="background: ${msg.profileColor};">${msg.username}</div>
+                <div class="message-content">${msg.content}</div>
+                <span class="timestamp">${new Date(msg.timestamp).toLocaleString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour12: false
+            })}</span>
+            `;
+            messagesContainer.appendChild(msgElement);
+        }
+
+        // Ensure the container is scrolled to the bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        alert('Error loading messages. Please try again later.');
     }
 }
+
 
 // Delete group
 async function deleteGroup(groupName) {
@@ -176,7 +194,7 @@ document.getElementById('logOutButton').addEventListener('click', () => {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
 
-        window.location.reload(true); 
+        window.location.reload(true);
         window.location.href = '/login.html';
     }
 });
